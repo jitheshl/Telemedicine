@@ -7,8 +7,7 @@ import {
     completeAppointment,
     payForAppointment,
     shareMeetingLink
-}
-from "../controllers/appointmentController.js";
+} from "../controllers/appointmentController.js";
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();

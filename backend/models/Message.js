@@ -11,11 +11,6 @@ const messageSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  appointment: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Appointment',
-    required: true
-  },
   text: {
     type: String,
     required: [true, 'Message text content is required']

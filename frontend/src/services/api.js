@@ -66,8 +66,4 @@ export const supportAPI = {
     API.put(`/support/${id}/reply`, { adminReply }),
 };
 
-export const messageAPI = {
-  getMessages: (appointmentId) => API.get(`/messages/appointment/${appointmentId}`),
-};
-
 export default API;

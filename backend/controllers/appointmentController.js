@@ -291,6 +291,7 @@ export const payForAppointment = async (req, res) => {
 // @desc    Doctor shares Google Meet link
 // @route   PUT /api/appointments/:id/meeting-link
 // @access  Private (Doctor)
+
 export const shareMeetingLink = async (req, res) => {
   try {
     const { meetingLink } = req.body;

@@ -17,6 +17,8 @@ export const protect = async (req, res, next) => {
 
       // Get user from the token, exclude password
       req.user = await User.findById(decoded.id).select('-password');
+      console.log("===== LOGGED IN USER =====");
+console.log(req.user);
       
       if (!req.user) {
         return res.status(401).json({ success: false, message: 'Not authorized, user not found' });

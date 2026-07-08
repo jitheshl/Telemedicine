@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { appointmentAPI, authAPI, doctorAPI, supportAPI } from '../services/api';
-import { Calendar, Clock, Award, Star, Activity, Plus, FileText, CheckCircle, XCircle, AlertCircle, Edit, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, Award, Star, Activity, Plus, FileText, CheckCircle, XCircle, AlertCircle, Edit } from 'lucide-react';
 import SymptomChecker from '../components/SymptomChecker';
-import ChatSessionModal from '../components/ChatSessionModal';
 import socket from "../services/socket";
 
 const PatientDashboard = () => {
@@ -28,7 +27,6 @@ const PatientDashboard = () => {
   // Selected Summary
   const [selectedSummary, setSelectedSummary] = useState(null);
   const [tickets, setTickets] = useState([]);
-  const [activeChatApp, setActiveChatApp] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -43,17 +41,17 @@ const PatientDashboard = () => {
   }, [profile]);
 
   useEffect(() => {
-    socket.connect();
+  socket.connect();
 
-    socket.on("connect", () => {
-      console.log("Patient Connected:", socket.id);
-    });
+  socket.on("connect", () => {
+    console.log("Patient Connected:", socket.id);
+  });
 
-    return () => {
-      socket.off("connect");
-      socket.disconnect();
-    };
-  }, []);
+  return () => {
+    socket.off("connect");
+    socket.disconnect();
+  };
+}, []);
 
   const fetchTickets = async () => {
   try {
@@ -414,38 +412,52 @@ const PatientDashboard = () => {
 
   {/* PAYMENT COMPLETED */}
 
-  {app.paymentStatus === "paid" && (
-      <div className="w-full rounded-xl border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-4 space-y-3">
-        <div>
-          <p className="font-bold text-green-600">
-            ✅ Payment Completed
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Paid on {new Date(app.paidAt).toLocaleString()}
-          </p>
-        </div>
+{app.paymentStatus === "paid" && (
 
-        {app.meetingLink ? (
-          <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
-            <p className="font-semibold text-indigo-650 dark:text-indigo-400">
-              🎥 Consultation Link Ready
-            </p>
-            <button
-              onClick={() => window.open(app.meetingLink, "_blank")}
-              className="mt-3 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
-            >
-              Join Consultation
-            </button>
-          </div>
-        ) : (
-          <div className="rounded-xl bg-yellow-50 dark:bg-yellow-950/20 p-3 border border-yellow-300 dark:border-yellow-800">
-            <p className="text-yellow-700 dark:text-yellow-400 font-semibold text-xs">
-              ⏳ Waiting for doctor to share the Google Meet link...
-            </p>
-          </div>
-        )}
+  <div className="w-full rounded-xl border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-4 space-y-3">
+
+    <div>
+      <p className="font-bold text-green-600">
+        ✅ Payment Completed
+      </p>
+
+      <p className="text-xs text-slate-500 mt-1">
+        Paid on {new Date(app.paidAt).toLocaleString()}
+      </p>
+    </div>
+
+    {app.meetingLink ? (
+
+      <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border">
+
+        <p className="font-semibold text-indigo-600">
+          🎥 Consultation Link Ready
+        </p>
+
+        <button
+          onClick={() => window.open(app.meetingLink, "_blank")}
+          className="mt-3 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+        >
+          Join Consultation
+        </button>
+
       </div>
-  )}
+
+    ) : (
+
+      <div className="rounded-xl bg-yellow-50 dark:bg-yellow-950/20 p-3 border border-yellow-300 dark:border-yellow-800">
+
+        <p className="text-yellow-700 dark:text-yellow-400 font-semibold">
+          ⏳ Waiting for doctor to share the Google Meet link...
+        </p>
+
+      </div>
+
+    )}
+
+  </div>
+
+)}
 
   {/* AI SUMMARY */}
 
@@ -456,17 +468,6 @@ const PatientDashboard = () => {
     >
       <FileText className="w-4 h-4" />
       <span>View AI Summary</span>
-    </button>
-  )}
-
-  {/* CHAT SESSION */}
-  {app.status === 'confirmed' && app.consultationType === 'chat' && (
-    <button
-      onClick={() => setActiveChatApp(app)}
-      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-555 text-white font-bold text-xs flex items-center space-x-1.5 transition-all shadow-md shadow-indigo-600/10 cursor-pointer"
-    >
-      <MessageSquare className="w-4 h-4" />
-      <span>Chat Session</span>
     </button>
   )}
 
@@ -752,15 +753,6 @@ const PatientDashboard = () => {
 
       {/* AI Symptom Checker Modal wrapper */}
       <SymptomChecker isOpen={isCheckerOpen} onClose={() => setIsCheckerOpen(false)} />
-
-      {/* Chat Session Modal wrapper */}
-      {activeChatApp && (
-        <ChatSessionModal
-          appointment={activeChatApp}
-          currentUser={user}
-          onClose={() => setActiveChatApp(null)}
-        />
-      )}
     </div>
   );
 };

@@ -1,10 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from "http";
+import { Server } from "socket.io";
 import connectDB from './config/db.js';
-import http from 'http';
-import { Server } from 'socket.io';
-import Message from './models/Message.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -13,7 +12,6 @@ import appointmentRoutes from './routes/appointmentRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import supportRoutes from './routes/supportRoutes.js';
-import messageRoutes from './routes/messageRoutes.js';
 
 // Configure dotenv
 dotenv.config();
@@ -25,15 +23,23 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
+
+// Middlewares
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
   },
 });
 
-// Middlewares
 app.use(cors());
+io.on("connection", (socket) => {
+  console.log("User Connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected:", socket.id);
+  });
+});
 app.use(express.json());
 
 // API Routes
@@ -43,40 +49,6 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/support', supportRoutes);
-app.use('/api/messages', messageRoutes);
-
-// Socket.io Connection Logic
-io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
-
-  socket.on('join_room', (appointmentId) => {
-    socket.join(appointmentId);
-    console.log(`User joined room/appointment: ${appointmentId}`);
-  });
-
-  socket.on('send_message', async (data) => {
-    const { appointmentId, senderId, receiverId, text } = data;
-    try {
-      const newMessage = new Message({
-        appointment: appointmentId,
-        sender: senderId,
-        receiver: receiverId,
-        text,
-      });
-      await newMessage.save();
-
-      const populatedMessage = await Message.findById(newMessage._id).populate('sender', 'name email role');
-      
-      io.to(appointmentId).emit('receive_message', populatedMessage);
-    } catch (err) {
-      console.error('Socket message save error:', err.message);
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`Socket disconnected: ${socket.id}`);
-  });
-});
 
 // Base Route
 app.get('/', (req, res) => {
@@ -105,7 +77,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(
+    `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`
+  );
 });
 
 export { io };

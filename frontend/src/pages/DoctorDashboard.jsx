@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { appointmentAPI } from '../services/api';
-import { Calendar, Clock, Check, X, FileText, Activity, Users, DollarSign, Star, ClipboardList, Info, MessageSquare } from 'lucide-react';
-import ChatSessionModal from '../components/ChatSessionModal';
+import { Calendar, Clock, Check, X, FileText, Activity, Users, DollarSign, Star, ClipboardList, Info } from 'lucide-react';
 import socket from "../services/socket";
 
 const DoctorDashboard = () => {
@@ -18,24 +17,23 @@ const DoctorDashboard = () => {
 
   // Selected Patient Details
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [activeChatApp, setActiveChatApp] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
   }, []);
 
   useEffect(() => {
-    socket.connect();
+  socket.connect();
 
-    socket.on("connect", () => {
-      console.log("Doctor Connected:", socket.id);
-    });
+  socket.on("connect", () => {
+    console.log("Doctor Connected:", socket.id);
+  });
 
-    return () => {
-      socket.off("connect");
-      socket.disconnect();
-    };
-  }, []);
+  return () => {
+    socket.off("connect");
+    socket.disconnect();
+  };
+}, []);
 
   const fetchAppointments = async () => {
     try {
@@ -81,28 +79,28 @@ const DoctorDashboard = () => {
   };
 
   const handleShareMeetingLink = async (appointmentId) => {
-    try {
-      const meetingLink = meetingLinks[appointmentId];
+  try {
+    const meetingLink = meetingLinks[appointmentId];
 
-      if (!meetingLink) {
-        alert("Please enter a Google Meet link.");
-        return;
-      }
-
-      const res = await appointmentAPI.shareMeetingLink(
-        appointmentId,
-        meetingLink
-      );
-
-      if (res.data.success) {
-        alert("Meeting link shared successfully.");
-        fetchAppointments();
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to share meeting link.");
+    if (!meetingLink) {
+      alert("Please enter a Google Meet link.");
+      return;
     }
-  };
+
+    const res = await appointmentAPI.shareMeetingLink(
+      appointmentId,
+      meetingLink
+    );
+
+    if (res.data.success) {
+      alert("Meeting link shared successfully.");
+      fetchAppointments();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to share meeting link.");
+  }
+};
 
   // Analytics helper calculations
   const completedAppointments = appointments.filter(
@@ -363,46 +361,42 @@ const totalEarnings = paidAppointments.reduce(
                       </>
                     )}
 
-                    {app.status === 'confirmed' &&  app.paymentStatus === 'paid' && (
-                      <div className="w-full space-y-3">
-                        <input
-                          type="text"
-                          placeholder="Paste Google Meet link..."
-                          value={meetingLinks[app._id] || app.meetingLink || ""}
-                          onChange={(e) =>
-                            setMeetingLinks({
-                              ...meetingLinks,
-                              [app._id]: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleShareMeetingLink(app._id)}
-                            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs"
-                          >
-                            Send Meeting Link
-                          </button>
-                          <button
-                            onClick={() => setCompleteAppId(app._id)}
-                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs"
-                          >
-                            Complete Session
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    {app.status === "confirmed" && app.paymentStatus === "paid" && (
+  <div className="w-full space-y-3">
 
-                    {app.status === 'confirmed' && app.consultationType === 'chat' && (
-                      <button
-                        onClick={() => setActiveChatApp(app)}
-                        className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-850 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        <span>Chat Session</span>
-                      </button>
-                    )}
+    <input
+      type="text"
+      placeholder="Paste Google Meet link..."
+      value={meetingLinks[app._id] || ""}
+      onChange={(e) =>
+        setMeetingLinks({
+          ...meetingLinks,
+          [app._id]: e.target.value,
+        })
+      }
+      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+    />
+
+    <div className="flex gap-2">
+
+      <button
+        onClick={() => handleShareMeetingLink(app._id)}
+        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+      >
+        Send Meeting Link
+      </button>
+
+      <button
+        onClick={() => setCompleteAppId(app._id)}
+        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+      >
+        Complete Session
+      </button>
+
+    </div>
+
+  </div>
+)}
                   </div>
                 </div>
               </div>
@@ -524,14 +518,6 @@ const totalEarnings = paidAppointments.reduce(
             </div>
           </div>
         </div>
-      )}
-      {/* Chat Session Modal wrapper */}
-      {activeChatApp && (
-        <ChatSessionModal
-          appointment={activeChatApp}
-          currentUser={user}
-          onClose={() => setActiveChatApp(null)}
-        />
       )}
     </div>
   );

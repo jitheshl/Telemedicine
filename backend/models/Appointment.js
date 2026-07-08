@@ -45,14 +45,15 @@ paidAt: {
       default: 'video',
     },
     meetingLink: {
-      type: String,
-      default: "",
-    },
-    meetingStatus: {
-      type: String,
-      enum: ["waiting", "shared", "completed"],
-      default: "waiting",
-    },
+  type: String,
+  default: "",
+},
+
+meetingStatus: {
+  type: String,
+  enum: ["waiting", "shared", "completed"],
+  default: "waiting",
+},
     symptomsDescription: {
       type: String,
       required: true,
